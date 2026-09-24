@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Annadanam Finder</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <meta name="theme-color" content="#6E2A2A">
+</head>
+<body>
+<button id="menuToggle" class="menu-toggle" aria-label="Open menu">
+    <span></span><span></span><span></span>
+</button>
+
+<div id="sideMenu" class="side-menu">
+    <button id="menuClose" class="menu-close" aria-label="Close menu">&times;</button>
+    <nav class="menu-links">
+        <a href="index.html">Home</a>
+        <a href="#" id="howItWorksLink">How this works</a>
+        <a href="#" id="shareAppLink">Share this app</a>
+        <a href="admin/login.html">Admin Login</a>
+    </nav>
+</div>
+<div id="menuOverlay" class="menu-overlay"></div>
+
+<div id="howItWorksModal" class="modal-overlay">
+    <div class="modal-box">
+        <button id="modalClose" class="menu-close">&times;</button>
+        <h2>How this works</h2>
+        <p>Annadanam means free food offered by temples, families, or community events. This site lists every Annadanam happening in and around the village.</p>
+        <p>Use the <strong>Today</strong>, <strong>Tomorrow</strong>, and <strong>Upcoming</strong> tabs to see what's on. Each listing shows the timing, venue, and a map — tap <strong>Navigate with Google Maps</strong> to get directions straight there.</p>
+        <p>Organizers can log in via <strong>Admin Login</strong> to post their own events.</p>
+    </div>
+</div>
+<header class="site-header">
+    <div class="wrap header-row">
+        <div class="brand">
+            <span class="brand-mark">🪔</span>
+            <span class="brand-name" id="villageName">మన కాళీపట్నం</span>
+        </div>
+        <p class="tagline">Free food happening near you — Annadanam listings</p>
+    </div>
+</header>
+
+<nav class="tabs wrap" role="tablist" aria-label="Event day filter">
+    <button class="tab-btn active" data-tab="today">Today <span class="count" id="countToday">0</span></button>
+    <button class="tab-btn" data-tab="tomorrow">Tomorrow <span class="count" id="countTomorrow">0</span></button>
+    <button class="tab-btn" data-tab="upcoming">Upcoming <span class="count" id="countUpcoming">0</span></button>
+</nav>
+
+<main class="wrap">
+    <section id="today" class="day-panel"><div class="empty-state"><p>Loading events…</p></div></section>
+    <section id="tomorrow" class="day-panel" hidden><div class="empty-state"><p>Loading events…</p></div></section>
+    <section id="upcoming" class="day-panel" hidden><div class="empty-state"><p>Loading events…</p></div></section>
+</main>
+
+<footer class="site-footer wrap">
+    <a href="admin/login.html" class="admin-login-badge">ADMIN LOGIN</a>
+    <span class="credit-line">Developed by Yogendra Sanaboyina</span>
+</footer>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/public.js"></script>
+<script src="js/menu.js"></script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js').catch(console.error);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOGIN AS ADMIN</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="admin-wrap">
+    <h1>LOGIN AS ADMIN</h1>
+    <p style="color:#5B5142; margin-top:0;">Only approved admin's can post annadanam events.</p>
+
+    <div class="admin-card">
+        <p id="errorMsg" style="color:#a33; display:none;"></p>
+        <form id="loginForm">
+            <div class="form-row">
+                <label for="username">Username</label>
+                <input type="text" id="username" required autofocus>
+            </div>
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Log in</button>
+            </div>
+        </form>
+    </div>
+
+    <p style="text-align:center; margin-top:20px;"><a href="../index.html" class="link-plain">← Back to event listings</a></p>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorMsg = document.getElementById('errorMsg');
+        errorMsg.style.display = 'none';
+
+        try {
+            const result = await apiSend('POST', '/api/auth/login', { username, password }, false);
+            localStorage.setItem('adminToken', result.token);
+            localStorage.setItem('adminUsername', result.username);
+            window.location.href = 'dashboard.html';
+        } catch (err) {
+            errorMsg.textContent = 'Invalid username or password.';
+            errorMsg.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>

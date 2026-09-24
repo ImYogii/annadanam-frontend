@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Post a new event</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="admin-wrap">
+    <h1 id="heading">Post a new event</h1>
+
+    <div class="admin-card">
+        <p id="errorMsg" style="color:#a33; display:none;"></p>
+        <form id="eventForm">
+            <input type="hidden" id="eventId">
+
+            <div class="form-row">
+                <label for="title">Event title</label>
+                <input type="text" id="title" placeholder="e.g. Annadanam at Sri Venkateswara Temple" required>
+            </div>
+
+            <div class="form-row">
+                <label for="description">Description (optional)</label>
+                <textarea id="description" rows="3" placeholder="e.g. Free lunch for all devotees, prasadam served after pooja"></textarea>
+            </div>
+
+            <div class="form-row">
+                <label for="organizerName">Hosted by</label>
+                <input type="text" id="organizerName" placeholder="Temple / family / committee name" required>
+            </div>
+
+            <div class="form-row">
+                <label for="contactNumber">Contact number (optional)</label>
+                <input type="text" id="contactNumber" placeholder="10-digit phone number">
+            </div>
+
+            <div class="form-row">
+                <label for="eventDate">Event date</label>
+                <input type="date" id="eventDate" required>
+            </div>
+
+            <div class="form-row" style="display:flex; gap:14px;">
+                <div style="flex:1;">
+                    <label for="startTime">Start time</label>
+                    <input type="time" id="startTime">
+                </div>
+                <div style="flex:1;">
+                    <label for="endTime">End time (optional)</label>
+                    <input type="time" id="endTime">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label for="venueAddress">Venue address (as written for visitors)</label>
+                <input type="text" id="venueAddress" placeholder="Full address, landmark helps" required>
+            </div>
+
+            <div class="form-row" style="display:flex; gap:14px;">
+                <div style="flex:1;">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" placeholder="e.g. 17.385044" required>
+                </div>
+                <div style="flex:1;">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" placeholder="e.g. 78.486671" required>
+                </div>
+            </div>
+            <p style="font-size:0.85rem; color:#5B5142; margin-top:-6px;">
+                Tip: open the venue in Google Maps on your phone, long-press the exact spot, and the
+                latitude/longitude will show at the bottom — tap to copy.
+            </p>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Save event</button>
+                <a href="dashboard.html" class="link-plain" style="margin-left:14px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script>
+    requireLogin();
+
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id');
+
+    if (editId) {
+        document.getElementById('pageTitle').textContent = 'Edit event';
+        document.getElementById('heading').textContent = 'Edit event';
+        loadEventForEdit(editId);
+    }
+
+    async function loadEventForEdit(id) {
+        try {
+            const event = await apiGet(`/api/admin/events/${id}`, true);
+            document.getElementById('eventId').value = event.id;
+            document.getElementById('title').value = event.title;
+            document.getElementById('description').value = event.description || '';
+            document.getElementById('organizerName').value = event.organizerName;
+            document.getElementById('contactNumber').value = event.contactNumber || '';
+            document.getElementById('eventDate').value = event.eventDate;
+            document.getElementById('startTime').value = event.startTime || '';
+            document.getElementById('endTime').value = event.endTime || '';
+            document.getElementById('venueAddress').value = event.venueAddress;
+            document.getElementById('latitude').value = event.latitude;
+            document.getElementById('longitude').value = event.longitude;
+        } catch (e) {
+            alert('Could not load event for editing.');
+        }
+    }
+
+    document.getElementById('eventForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorMsg = document.getElementById('errorMsg');
+        errorMsg.style.display = 'none';
+
+        const payload = {
+            title: document.getElementById('title').value,
+            description: document.getElementById('description').value,
+            organizerName: document.getElementById('organizerName').value,
+            contactNumber: document.getElementById('contactNumber').value,
+            eventDate: document.getElementById('eventDate').value,
+            startTime: document.getElementById('startTime').value || null,
+            endTime: document.getElementById('endTime').value || null,
+            venueAddress: document.getElementById('venueAddress').value,
+            latitude: parseFloat(document.getElementById('latitude').value),
+            longitude: parseFloat(document.getElementById('longitude').value),
+            status: 'APPROVED'
+        };
+
+        try {
+            if (editId) {
+                await apiSend('PUT', `/api/admin/events/${editId}`, payload, true);
+            } else {
+                await apiSend('POST', '/api/admin/events', payload, true);
+            }
+            window.location.href = 'dashboard.html';
+        } catch (err) {
+            errorMsg.textContent = 'Could not save event. Check all required fields are filled in.';
+            errorMsg.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>

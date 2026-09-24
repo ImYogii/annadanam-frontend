@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="admin-wrap">
+    <h1>Create a new admin</h1>
+    <p style="color:#5B5142; margin-top:0;">This creates another organizer account that can log in and post events.</p>
+
+    <div class="admin-card">
+        <p id="errorMsg" style="color:#a33; display:none;"></p>
+
+        <form id="createAdminForm">
+            <div class="form-row">
+                <label for="name">Full name</label>
+                <input type="text" id="name" placeholder="e.g. Ramesh Kumar" required>
+            </div>
+
+            <div class="form-row">
+                <label for="username">Username (used to log in)</label>
+                <input type="text" id="username" placeholder="e.g. ramesh" required>
+            </div>
+
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="At least 6 characters" required minlength="6">
+            </div>
+
+            <div class="form-row">
+                <label for="phone">Phone number (optional)</label>
+                <input type="text" id="phone" placeholder="10-digit phone number">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Create admin</button>
+                <a href="dashboard.html" class="link-plain" style="margin-left:14px;">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script>
+    requireLogin();
+    if (localStorage.getItem('adminUsername') !== 'admin') {
+        alert('Only the main admin can create new admins.');
+        window.location.href = 'dashboard.html';
+    }
+
+    document.getElementById('createAdminForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorMsg = document.getElementById('errorMsg');
+        const successMsg = document.getElementById('successMsg');
+        errorMsg.style.display = 'none';
+
+        const payload = {
+            name: document.getElementById('name').value,
+            username: document.getElementById('username').value,
+            password: document.getElementById('password').value,
+            phone: document.getElementById('phone').value
+        };
+
+        try {
+        await apiSend('POST', '/api/admin/events/create', payload, true);
+        sessionStorage.setItem('flashMessage', 'Admin created successfully.');
+        window.location.href = 'dashboard.html';
+        } catch (err) {
+            errorMsg.textContent = 'Could not create admin. The username may already be taken, or a required field is missing.';
+            errorMsg.style.display = 'block';
+        }
+    });
+</script>
+</body>
+</html>

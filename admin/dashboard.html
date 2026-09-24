@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Rozha+One&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="admin-wrap" style="max-width: 780px;">
+
+    <div class="top-bar">
+        <h1>Your posted events</h1>
+        <button id="logoutBtn" class="admin-login-badge" style="cursor:pointer;">Log out</button>
+    </div>
+
+    <p><a href="event-form.html" class="btn-primary" style="display:inline-block; text-decoration:none;">+ Post a new event</a></p>
+    <p id="createAdminLinkWrap" style="display:none;">
+        <a href="create-admin.html" class="btn-primary" style="display:inline-block; text-decoration:none; background:var(--leaf); color:var(--ivory);">+ Create Admin</a>
+    </p>
+
+    <table class="admin-table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Venue</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="eventsBody">
+        <tr><td colspan="5" style="text-align:center; color:#5B5142;">Loading…</td></tr>
+        </tbody>
+    </table>
+
+    <p style="margin-top:20px;"><a href="../index.html" class="link-plain">← View public listing</a></p>
+    <p style="text-align:center; margin-top:24px;"><span class="credit-line">Developed by Yogendra Sanaboyina</span></p>
+</div>
+
+<script src="../js/config.js"></script>
+<script src="../js/api.js"></script>
+<script>
+    if (localStorage.getItem('adminUsername') === 'admin') {
+        document.getElementById('createAdminLinkWrap').style.display = 'block';
+    }
+    showFlashMessageIfAny();
+
+    function showFlashMessageIfAny() {
+        const message = sessionStorage.getItem('flashMessage');
+        if (!message) return;
+        sessionStorage.removeItem('flashMessage');
+
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+
+        requestAnimationFrame(() => toast.classList.add('show'));
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 2500);
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('adminToken');
+        window.location.href = '../index.html';
+    });
+
+    async function loadEvents() {
+        const tbody = document.getElementById('eventsBody');
+        try {
+            const events = await apiGet('/api/admin/events', true);
+            if (events.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#5B5142;">No events posted yet.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = events.map(rowHtml).join('');
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', () => deleteEvent(btn.dataset.id));
+            });
+        } catch (e) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#a33;">Could not load events.</td></tr>`;
+        }
+    }
+
+    function rowHtml(event) {
+        const date = new Date(event.eventDate + 'T00:00:00')
+            .toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        return `
+            <tr>
+                <td>${date}</td>
+                <td>${escapeHtml(event.title)}</td>
+                <td>${escapeHtml(event.venueAddress)}</td>
+                <td>${event.status}</td>
+                <td>
+                    <a href="event-form.html?id=${event.id}" class="link-plain">Edit</a>
+                    <button class="delete-btn link-danger" data-id="${event.id}"
+                        style="background:none;border:none;cursor:pointer;text-decoration:underline;">Delete</button>
+                </td>
+            </tr>
+        `;
+    }
+
+    async function deleteEvent(id) {
+        if (!confirm('Delete this event?')) return;
+        try {
+            await apiDelete(`/api/admin/events/${id}`, true);
+            loadEvents();
+        } catch (e) {
+            alert('Could not delete event.');
+        }
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    loadEvents();
+</script>
+</body>
+</html>
